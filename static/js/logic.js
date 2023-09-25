@@ -37,25 +37,28 @@ d3.json(queryUrl).then(function (data) {
 
   const depthLabels = ["< 10 km", "10 - 50 km", "> 50 km"];
 
-  function getColor(feature) {
+  function getColor(depth) {
     if (depth < 10) {
-      return "#00FF00"; // Green for depth < 10 km
+      return depthColors[0]; // Green for depth < 10 km
     } else if (depth <= 50) {
-      return "#FFFF00"; // Yellow for depth between 10 - 50 km
+      return depthColors[1]; // Yellow for depth between 10 - 50 km
     } else {
-      return "#FF0000"; // Red for depth > 50 km
+      return depthColors[2]; // Red for depth > 50 km
     }
   }
 
-  function getRadius(feature) {
+  function getRadius(magnitude) {
     return magnitude * 5;
   }
 
   function mapStyle(feature) {
+    const depth = feature.geometry.coordinates[2];
+    const magnitude = feature.properties.mag;
+
     return {
-      color: "#0000ff",
-      fillColor: "#ADD8E6",
-      radius: 10
+      color: "#fff",
+      fillColor: getColor(depth),
+      radius: getRadius(magnitude)
     };
   }
 
@@ -70,13 +73,13 @@ d3.json(queryUrl).then(function (data) {
     style: mapStyle,
     onEachFeature: onEachFeature
   }).addTo(earthquakes);
-  
+
   function createLegend() {
     let legend = L.control({ position: "bottomright" });
     legend.onAdd = function () {
       let div = L.DomUtil.create("div", "info legend");
       div.innerHTML += "<h4>Depth Legend</h4>";
-      
+
       for (let i = 0; i < depthColors.length; i++) {
         div.innerHTML +=
           '<i style="background:' +
